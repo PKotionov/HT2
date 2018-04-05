@@ -24,10 +24,15 @@ public class Person {
         this.name = name;
         this.surname = surname;
         this.middlename = middlename;
+        putAllPhones();
+    }
 
-        // Извлечение телефонов человека из БД.
+    // Извлечение телефонов человека из БД.
+    private void putAllPhones() {
         ResultSet db_data = DBWorker.getInstance().getDBData("SELECT * FROM `phone` WHERE `owner`=" + id);
-
+        if (!DBWorker.getInstance().getDataBaseErrorMessage().toString().isEmpty()) {
+            System.out.println(DBWorker.getInstance().getDataBaseErrorMessage());
+        }
         try {
             // Если у человека нет телефонов, ResultSet будет == null.
             if (db_data != null) {
@@ -37,6 +42,14 @@ public class Person {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if (db_data != null) {
+                try {
+                    db_data.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

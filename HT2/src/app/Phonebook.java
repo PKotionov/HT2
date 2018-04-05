@@ -32,11 +32,11 @@ public class Phonebook {
         while (db_data.next()) {
             this.persons.put(db_data.getString("id"), new Person(db_data.getString("id"), db_data.getString("name"), db_data.getString("surname"), db_data.getString("middlename")));
         }
+        db_data.close();
     }
 
     // Добавление записи о человеке.
     public boolean addPerson(Person person) {
-        ResultSet db_result;
         String query;
 
         // У человека может не быть отчества.

@@ -7,6 +7,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DBWorker {
+    private Statement statement;
+    private Connection connect;
+    private StringBuilder dataBaseErrorMessage = new StringBuilder("");
 
     // Количество рядов таблицы, затронутых последним запросом.
     private Integer affected_rows = 0;
@@ -24,7 +27,6 @@ public class DBWorker {
         if (instance == null) {
             instance = new DBWorker();
         }
-
         return instance;
     }
 
@@ -33,32 +35,35 @@ public class DBWorker {
         // Просто "заглушка".
     }
 
-    // Выполнение запросов на выборку данных.
-    public ResultSet getDBData(String query) {
-        Statement statement;
-        Connection connect;
+    //метод создания подключения
+    private void getConnection() {
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
             connect = DriverManager.getConnection("jdbc:mysql://localhost/phonebook?user=root&password=&useUnicode=true&characterEncoding=UTF-8&characterSetResults=utf8&connectionCollation=utf8_general_ci");
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+            dataBaseErrorMessage.append("Error in Method [getConnection] method: ").append(e.getMessage());
+        }
+    }
+
+    // Выполнение запросов на выборку данных.
+    public ResultSet getDBData(String query) {
+        getConnection();
+        try {
             statement = connect.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
             return resultSet;
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
+            dataBaseErrorMessage.append("Error in Method [getDBData] method: ").append(e.getMessage());
         }
-
-        System.out.println("null on getDBData()!");
         return null;
-
     }
 
     // Выполнение запросов на модификацию данных.
     public Integer changeDBData(String query) {
-        Statement statement;
-        Connection connect;
+        getConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            connect = DriverManager.getConnection("jdbc:mysql://localhost/phonebook?user=root&password=&useUnicode=true&characterEncoding=UTF-8&characterSetResults=utf8&connectionCollation=utf8_general_ci");
             statement = connect.createStatement();
             this.affected_rows = statement.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
 
@@ -69,20 +74,16 @@ public class DBWorker {
             }
 
             return this.affected_rows;
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
+            dataBaseErrorMessage.append("Error in Method [changeDBData] method: ").append(e.getMessage());
         }
-
-        System.out.println("null on changeDBData()!");
         return null;
     }
 
     public Integer addPhoneToDBData(String query) {
-        Statement statement;
-        Connection connect;
+        getConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            connect = DriverManager.getConnection("jdbc:mysql://localhost/phonebook?user=root&password=&useUnicode=true&characterEncoding=UTF-8&characterSetResults=utf8&connectionCollation=utf8_general_ci");
             statement = connect.createStatement();
             this.affected_rows = statement.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
 
@@ -93,45 +94,37 @@ public class DBWorker {
             }
 
             return this.affected_rows;
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
+            dataBaseErrorMessage.append("Error in Method [addPhoneToDBData] method: ").append(e.getMessage());
         }
-
-        System.out.println("null on changeDBData()!");
         return null;
     }
 
     public Integer editPhoneToDBData(String query) {
-        Statement statement;
-        Connection connect;
+        getConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            connect = DriverManager.getConnection("jdbc:mysql://localhost/phonebook?user=root&password=&useUnicode=true&characterEncoding=UTF-8&characterSetResults=utf8&connectionCollation=utf8_general_ci");
             statement = connect.createStatement();
             this.affected_rows = statement.executeUpdate(query);
             return this.affected_rows;
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
+            dataBaseErrorMessage.append("Error in Method [editPhoneToDBData] method: ").append(e.getMessage());
         }
-
-        System.out.println("null on changeDBData()!");
         return null;
     }
 
     public boolean deletePhoneFromDBData(String query) {
-        Statement statement;
-        Connection connect;
+        getConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-            connect = DriverManager.getConnection("jdbc:mysql://localhost/phonebook?user=root&password=&useUnicode=true&characterEncoding=UTF-8&characterSetResults=utf8&connectionCollation=utf8_general_ci");
             statement = connect.createStatement();
             this.affected_rows = statement.executeUpdate(query);
             return true;
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
+            dataBaseErrorMessage.append("Error in Method [deletePhoneFromDBData] method: ").append(e.getMessage());
         }
 
-        System.out.println("null on changeDBData()!");
         return false;
     }
 
@@ -149,8 +142,11 @@ public class DBWorker {
         return last_insert_phone_id;
     }
 
+    public StringBuilder getDataBaseErrorMessage() {
+        return dataBaseErrorMessage;
+    }
 
-    // Геттеры и сеттеры.
+// Геттеры и сеттеры.
     // -------------------------------------------------
 }
 
